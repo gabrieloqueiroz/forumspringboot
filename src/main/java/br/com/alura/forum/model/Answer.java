@@ -1,4 +1,4 @@
-package br.com.alura.forum.modelo;
+package br.com.alura.forum.model;
 
 import java.time.LocalDateTime;
 
@@ -9,16 +9,16 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Resposta {
+public class Answer {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String mensagem;
 	@ManyToOne
-	private Topico topico;
+	private Topic topic;
 	private LocalDateTime dataCriacao = LocalDateTime.now();
 	@ManyToOne
-	private Usuario autor;
+	private User autor;
 	private Boolean solucao = false;
 
 	@Override
@@ -37,7 +37,7 @@ public class Resposta {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Resposta other = (Resposta) obj;
+		Answer other = (Answer) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -62,12 +62,12 @@ public class Resposta {
 		this.mensagem = mensagem;
 	}
 
-	public Topico getTopico() {
-		return topico;
+	public Topic getTopico() {
+		return topic;
 	}
 
-	public void setTopico(Topico topico) {
-		this.topico = topico;
+	public void setTopico(Topic topic) {
+		this.topic = topic;
 	}
 
 	public LocalDateTime getDataCriacao() {
@@ -78,11 +78,11 @@ public class Resposta {
 		this.dataCriacao = dataCriacao;
 	}
 
-	public Usuario getAutor() {
+	public User getAutor() {
 		return autor;
 	}
 
-	public void setAutor(Usuario autor) {
+	public void setAutor(User autor) {
 		this.autor = autor;
 	}
 

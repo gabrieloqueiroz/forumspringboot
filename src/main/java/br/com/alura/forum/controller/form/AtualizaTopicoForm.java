@@ -3,8 +3,8 @@ package br.com.alura.forum.controller.form;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import br.com.alura.forum.modelo.Topico;
-import br.com.alura.forum.repository.TopicoRepository;
+import br.com.alura.forum.model.Topic;
+import br.com.alura.forum.repository.TopicRepository;
 
 public class AtualizaTopicoForm {
 
@@ -30,15 +30,15 @@ public class AtualizaTopicoForm {
 		this.titulo = titulo;
 	}
 
-	public Topico atualiza(Long id, TopicoRepository topicoRepository) {
+	public Topic atualiza(Long id, TopicRepository topicoRepository) {
 		
-		Topico topico = topicoRepository.getOne(id);
+		Topic topic = topicoRepository.getOne(id);
 		
-		topico.setMensagem(this.mensagem);
-		topico.setTitulo(this.titulo);
+		topic.setMessage(this.mensagem);
+		topic.setTitle(this.titulo);
 		
 		
-		return topico;
+		return topic;
 	}
 
 }

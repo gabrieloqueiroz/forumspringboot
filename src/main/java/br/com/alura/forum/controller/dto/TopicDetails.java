@@ -5,29 +5,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import br.com.alura.forum.modelo.StatusTopico;
-import br.com.alura.forum.modelo.Topico;
+import br.com.alura.forum.model.TopicStatus;
+import br.com.alura.forum.model.Topic;
 
-public class DetalhesDoTopicoDto {
+public class TopicDetails {
 
 	private Long id;
 	private String mensagem;
 	private String titulo;
 	private LocalDateTime dataCriacao;
 	private String nomeAutor;
-	private StatusTopico status;
-	private List<RespostaDto> respostas;
+	private TopicStatus status;
+	private List<AnswerDto> respostas;
 	
 	
-	public DetalhesDoTopicoDto(Topico topico) {
-		this.id = topico.getId();
-		this.titulo = topico.getTitulo();
-		this.mensagem = topico.getMensagem();
-		this.dataCriacao = topico.getDataCriacao();
-		this.nomeAutor = topico.getAutor().getNome();
-		this.status = topico.getStatus();
+	public TopicDetails(Topic topic) {
+		this.id = topic.getId();
+		this.titulo = topic.getTitle();
+		this.mensagem = topic.getMessage();
+		this.dataCriacao = topic.getCreationDate();
+		this.nomeAutor = topic.getAuthor().getName();
+		this.status = topic.getStatus();
 		this.respostas = new ArrayList<>(); 
-		this.respostas.addAll(topico.getRespostas().stream().map(RespostaDto::new).collect(Collectors.toList()));
+		this.respostas.addAll(topic.getRespostas().stream().map(AnswerDto::new).collect(Collectors.toList()));
 		
 	}
 
@@ -51,11 +51,11 @@ public class DetalhesDoTopicoDto {
 		return nomeAutor;
 	}
 
-	public StatusTopico getStatus() {
+	public TopicStatus getStatus() {
 		return status;
 	}
 
-	public List<RespostaDto> getRespostas() {
+	public List<AnswerDto> getRespostas() {
 		return respostas;
 	}
 

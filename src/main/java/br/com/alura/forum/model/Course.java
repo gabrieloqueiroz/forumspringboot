@@ -1,17 +1,15 @@
-package br.com.alura.forum.modelo;
+package br.com.alura.forum.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
-public class Curso {
+@Table(name = "curso")
+public class Course {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String nome;
-	private String categoria;
+	private String name;
+	private String category;
 
 
 	
@@ -31,7 +29,7 @@ public class Curso {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Curso other = (Curso) obj;
+		Course other = (Course) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -48,20 +46,20 @@ public class Curso {
 		this.id = id;
 	}
 
-	public String getNome() {
-		return nome;
+	public String getName() {
+		return name;
 	}
 
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public String getCategoria() {
-		return categoria;
+	public String getCategory() {
+		return category;
 	}
 
-	public void setCategoria(String categoria) {
-		this.categoria = categoria;
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
 }

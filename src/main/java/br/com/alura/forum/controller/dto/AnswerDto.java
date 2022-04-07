@@ -2,20 +2,20 @@ package br.com.alura.forum.controller.dto;
 
 import java.time.LocalDateTime;
 
-import br.com.alura.forum.modelo.Resposta;
+import br.com.alura.forum.model.Answer;
 
-public class RespostaDto {
+public class AnswerDto {
 
 	private Long id;
 	private String nomeAutor;
 	private String mensagem;
 	private LocalDateTime dataCriacao;
 
-	public RespostaDto(Resposta resposta) {
-		this.id = resposta.getId();
-		this.nomeAutor = resposta.getAutor().getNome();
-		this.mensagem = resposta.getMensagem();
-		this.dataCriacao = resposta.getDataCriacao();
+	public AnswerDto(Answer answer) {
+		this.id = answer.getId();
+		this.nomeAutor = answer.getAutor().getName();
+		this.mensagem = answer.getMensagem();
+		this.dataCriacao = answer.getDataCriacao();
 	}
 
 	public Long getId() {

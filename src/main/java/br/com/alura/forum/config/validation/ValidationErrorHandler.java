@@ -1,4 +1,4 @@
-package br.com.alura.forum.config.validacao;
+package br.com.alura.forum.config.validation;
 
 import java.util.ArrayList;
 import java.util.List;

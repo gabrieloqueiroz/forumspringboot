@@ -28,10 +28,10 @@ public class Topic {
 	public Topic() {
 	}
 
-	public Topic(String title, String message, Course curso) {
+	public Topic(String title, String message, Course course) {
 		this.title = title;
 		this.message = message;
-		this.course = curso;
+		this.course = course;
 	}
 
 	@Override

@@ -1,27 +1,30 @@
 package br.com.alura.forum.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.alura.forum.controller.dto.TopicDetails;
 import br.com.alura.forum.controller.dto.TopicDto;
-import br.com.alura.forum.controller.form.AtualizaTopicoForm;
-import br.com.alura.forum.controller.form.TopicosForm;
+import br.com.alura.forum.controller.form.UpdateFormTopic;
+import br.com.alura.forum.controller.form.FormTopics;
 import br.com.alura.forum.model.Topic;
 import br.com.alura.forum.repository.CourseRepository;
 import br.com.alura.forum.repository.TopicRepository;
+
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @RestController
 @RequestMapping("/topics")
@@ -37,9 +40,11 @@ public class TopicsController {
 	}
 
 	@GetMapping
-	public Page<TopicDto> listTopics(@RequestParam(required = false) String courseName, @RequestParam int page, @RequestParam int quantity) {
-
-		Pageable pagination = PageRequest.of(page, quantity);
+	@Cacheable(value = "topicList")
+	public Page<TopicDto> listTopics(
+			@RequestParam(required = false) String courseName,
+			@PageableDefault(sort = "id", direction = DESC) Pageable pagination
+	) {
 
 		if (courseName == null) {
 			Page<Topic> topics = topicRepository.findAll(pagination);
@@ -62,8 +67,9 @@ public class TopicsController {
 
 	@PostMapping
 	@Transactional
-	public ResponseEntity<TopicDto> cadastrar(@RequestBody @Valid TopicosForm form, UriComponentsBuilder uriBuilder) {
-		Topic topic = form.converter(courseRepository);
+	@CacheEvict(value = "topicList", allEntries = true )
+	public ResponseEntity<TopicDto> register(@RequestBody @Valid FormTopics form, UriComponentsBuilder uriBuilder) {
+		Topic topic = form.convert(courseRepository);
 		topicRepository.save(topic);
 
 		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topic.getId()).toUri();
@@ -73,44 +79,35 @@ public class TopicsController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<TopicDetails> detalhar (@PathVariable Long id) { //PathVariable diz que o id ira vir direto na URL. Não vai utilizar "?" vai vir direto após a barra
+	public ResponseEntity<TopicDetails> detailTopic(@PathVariable Long id) { //PathVariable diz que o id ira vir direto na URL. Não vai utilizar "?" vai vir direto após a barra
 		
 		Optional<Topic> topico = topicRepository.findById(id);
-		
-		
+
 		if(topico.isPresent()) {
-					
 			return ResponseEntity.ok(new TopicDetails(topico.get()));
 		}
-		
+
 		return ResponseEntity.notFound().build();
-		
-	
 	}
-	
 	
 	@PutMapping("/{id}")
 	@Transactional
-	public ResponseEntity<TopicDto> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizaTopicoForm form ) {
+	@CacheEvict(value = "topicList", allEntries = true )
+	public ResponseEntity<TopicDto> updateTopic(@PathVariable Long id, @RequestBody @Valid UpdateFormTopic form ) {
 			
-		Topic topic = form.atualiza(id, topicRepository);
-		
+		Topic topic = form.update(id, topicRepository);
 		
 		return ResponseEntity.ok(new TopicDto(topic));
-
 	}
-	
 	
 	
 	@DeleteMapping("/{id}")
 	@Transactional
-	public ResponseEntity<?> deletar(@PathVariable Long id) {
+	@CacheEvict(value = "topicList", allEntries = true )
+	public ResponseEntity<?> deleteTopic(@PathVariable Long id) {
 		
 		 topicRepository.deleteById(id);
-		
 
 		 return ResponseEntity.ok().build();
 	}
-		
-
 }

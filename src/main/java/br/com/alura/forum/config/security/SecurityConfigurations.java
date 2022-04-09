@@ -1,5 +1,6 @@
 package br.com.alura.forum.config.security;
 
+import br.com.alura.forum.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,16 +13,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 
     private AuthenticationService authenticationService;
+    private TokenService tokenService;
+    private UserRepository userRepository;
 
     @Autowired
-    public SecurityConfigurations(AuthenticationService authenticationService){
+    public SecurityConfigurations(AuthenticationService authenticationService, TokenService tokenService, UserRepository userRepository){
         this.authenticationService = authenticationService;
+        this.tokenService = tokenService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -39,7 +45,8 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/auth").permitAll()
                 .anyRequest().authenticated()
                 .and().csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().addFilterBefore(new FilterAuthenticationToken(tokenService, userRepository), UsernamePasswordAuthenticationFilter.class);
     }
 
     //configurações de recursos estaticos (css, imagens, js, etc...)

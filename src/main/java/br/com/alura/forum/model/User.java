@@ -2,7 +2,6 @@ package br.com.alura.forum.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -25,7 +24,7 @@ public class User implements UserDetails {
 	private String password;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	private List<ProfileAccess> profiles = new ArrayList<>();
+	private List<Profile> profiles = new ArrayList<>();
 
 	@Override
 	public int hashCode() {

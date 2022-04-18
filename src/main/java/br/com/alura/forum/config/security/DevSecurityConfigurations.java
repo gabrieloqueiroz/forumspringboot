@@ -18,50 +18,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@Profile("prod")
-public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
+@Profile("dev")
+public class DevSecurityConfigurations extends WebSecurityConfigurerAdapter {
 
     private AuthenticationService authenticationService;
     private TokenService tokenService;
     private UserRepository userRepository;
 
     @Autowired
-    public SecurityConfigurations(AuthenticationService authenticationService, TokenService tokenService, UserRepository userRepository){
+    public DevSecurityConfigurations(AuthenticationService authenticationService, TokenService tokenService, UserRepository userRepository){
         this.authenticationService = authenticationService;
         this.tokenService = tokenService;
         this.userRepository = userRepository;
-    }
-
-    @Override
-    @Bean
-    protected AuthenticationManager authenticationManager() throws Exception {
-        return super.authenticationManager();
     }
 
     //configurações de autorização
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers(HttpMethod.GET,"/topics").permitAll()
-                .antMatchers(HttpMethod.GET, "/topics/*").permitAll()
-                .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/auth").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/topics/*").hasRole("MODERATOR")
-                .anyRequest().authenticated()
-                .and().csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().addFilterBefore(new FilterAuthenticationToken(tokenService, userRepository), UsernamePasswordAuthenticationFilter.class);
-    }
-
-    //configurações de recursos estaticos (css, imagens, js, etc...)
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/**.html", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
-    }
-
-    //configurações de autenticação
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(authenticationService).passwordEncoder(new BCryptPasswordEncoder());
+                .antMatchers("/**").permitAll()
+                .and().csrf().disable();
     }
 }

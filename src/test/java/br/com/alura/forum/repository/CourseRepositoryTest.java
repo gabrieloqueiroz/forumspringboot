@@ -28,4 +28,16 @@ public class CourseRepositoryTest {
         Assertions.assertNotNull(response);
         Assertions.assertEquals(courseName, response.getName());
     }
+
+    @Test
+    public void not_should_return_course_when_find_by_name_not_exist(){
+        //Given
+        String courseName = "JPA";
+
+        //When
+        Course response = courseRepository.findByName(courseName);
+
+        //Then
+        Assertions.assertNull(response);
+    }
 }

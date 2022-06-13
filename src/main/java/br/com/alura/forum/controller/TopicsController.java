@@ -1,11 +1,13 @@
 package br.com.alura.forum.controller;
 
-import java.net.URI;
-import java.util.Optional;
-
-import javax.transaction.Transactional;
-import javax.validation.Valid;
-
+import br.com.alura.forum.controller.dto.TopicDetails;
+import br.com.alura.forum.controller.dto.TopicDto;
+import br.com.alura.forum.controller.form.FormTopics;
+import br.com.alura.forum.controller.form.UpdateFormTopic;
+import br.com.alura.forum.model.Topic;
+import br.com.alura.forum.repository.CourseRepository;
+import br.com.alura.forum.repository.TopicRepository;
+import br.com.alura.forum.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -16,13 +18,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import br.com.alura.forum.controller.dto.TopicDetails;
-import br.com.alura.forum.controller.dto.TopicDto;
-import br.com.alura.forum.controller.form.UpdateFormTopic;
-import br.com.alura.forum.controller.form.FormTopics;
-import br.com.alura.forum.model.Topic;
-import br.com.alura.forum.repository.CourseRepository;
-import br.com.alura.forum.repository.TopicRepository;
+import javax.transaction.Transactional;
+import javax.validation.Valid;
+import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -32,56 +31,39 @@ public class TopicsController {
 
 	private TopicRepository topicRepository;
 	private CourseRepository courseRepository;
+	private TopicService topicService;
 
 	@Autowired
-	public TopicsController(TopicRepository topicRepository, CourseRepository courseRepository) {
+	public TopicsController(TopicRepository topicRepository, CourseRepository courseRepository, TopicService topicService) {
 		this.topicRepository = topicRepository;
 		this.courseRepository = courseRepository;
+		this.topicService = topicService;
 	}
 
 	@GetMapping
-	@Cacheable(value = "topicList")
+	@Cacheable(value = "topicList")	// Cacheable - primeira vez executado ele vai pegar linha por linha, das proximas ele vai utilizar ja oque esta em cache - Na aplicação podemos ter varios Cacheable, por parametro então informamos o identificar desse cache	
 	public Page<TopicDto> listTopics(
-			@RequestParam(required = false) String courseName,
+			@RequestParam(required = false) String courseName, // Esse parametro diferente do PathVariable, ele é passado após o ponto de interrogação
 			@PageableDefault(sort = "id", direction = DESC) Pageable pagination
 	) {
-
-		if (courseName == null) {
-			Page<Topic> topics = topicRepository.findAll(pagination);
-			return TopicDto.converter(topics);
-		} else {
-			// Para navegar e trazer o filtro colocamos o nome do atributo. Como é um
-			// relacionamento colocamos o Underline para ele navegar pelas classes
-			Page<Topic> topics = topicRepository.findByCourse_Name(courseName, pagination);
-			return TopicDto.converter(topics);
-		}
-
+		return topicService.findTopic(pagination, courseName);
 	}
-
-	/*
-	 * @PostMapping public void cadastrar(@RequestBody TopicosForm form) { Topico
-	 * topico = form.converter(cursoRepository);
-	 * 
-	 * topicoRepository.save(topico); }
-	 */
 
 	@PostMapping
 	@Transactional
-	@CacheEvict(value = "topicList", allEntries = true )
+	@CacheEvict(value = "topicList", allEntries = true ) // CacheEvict é utilizado em metodos ou endpoints que atualizam registros, então anotamos ele pra limpar os caches ja salvos, passamos como value o nome do cache allentries para invalidar todos os registros
 	public ResponseEntity<TopicDto> register(@RequestBody @Valid FormTopics form, UriComponentsBuilder uriBuilder) {
-		Topic topic = form.convert(courseRepository);
-		topicRepository.save(topic);
 
-		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topic.getId()).toUri();
-		return ResponseEntity.created(uri).body(new TopicDto(topic));
-		
+		Topic topic = topicService.register(form);
 
+		URI uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topic.getId()).toUri(); // No Http quando devolvemos 201 ou created, precisamos devolver o cabeçalho do recurso criado e uma representação do que foi criado
+		return ResponseEntity.created(uri).body(new TopicDto(topic)); // O UriComponentsBuilder ajudar a indicar o path criado e buildAndExpand vai settar dinamicamente o Id criado pra esse recurso
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<TopicDetails> detailTopic(@PathVariable Long id) { //PathVariable diz que o id ira vir direto na URL. Não vai utilizar "?" vai vir direto após a barra
-		
-		Optional<Topic> topico = topicRepository.findById(id);
+
+		Optional<Topic> topico = topicService.detail(id);
 
 		if(topico.isPresent()) {
 			return ResponseEntity.ok(new TopicDetails(topico.get()));
@@ -94,8 +76,8 @@ public class TopicsController {
 	@Transactional
 	@CacheEvict(value = "topicList", allEntries = true )
 	public ResponseEntity<TopicDto> updateTopic(@PathVariable Long id, @RequestBody @Valid UpdateFormTopic form ) {
-			
-		Topic topic = form.update(id, topicRepository);
+
+		Topic topic = topicService.updateTopic(id, form);
 		
 		return ResponseEntity.ok(new TopicDto(topic));
 	}
@@ -105,8 +87,8 @@ public class TopicsController {
 	@Transactional
 	@CacheEvict(value = "topicList", allEntries = true )
 	public ResponseEntity<?> deleteTopic(@PathVariable Long id) {
-		
-		 topicRepository.deleteById(id);
+
+		topicService.deleteById(id);
 
 		 return ResponseEntity.ok().build();
 	}
